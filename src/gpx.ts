@@ -231,6 +231,9 @@ export function validateGpx(xmlContent: string): {
           if (pt.lon < -180 || pt.lon > 180) {
             errors.push(`Point ${i} has invalid longitude: ${pt.lon}`);
           }
+          if (pt.time && isNaN(pt.time.getTime())) {
+            errors.push(`Point ${i} has invalid timestamp`);
+          }
         }
       }
     }

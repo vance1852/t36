@@ -9,6 +9,19 @@ import {
 import { writeGpx } from "./gpx.js";
 import { formatPace, formatDuration } from "./analyzer.js";
 
+function safeNum(n: number, fallback = 0): number {
+  return isFinite(n) ? n : fallback;
+}
+
+function safeFixed(n: number, digits = 2): string {
+  return safeNum(n, 0).toFixed(digits);
+}
+
+function safeDate(d: Date, fallback = ""): string {
+  if (!d || isNaN(d.getTime())) return fallback;
+  return d.toISOString();
+}
+
 export function exportCleanedGpx(
   originalData: GpxData,
   cleanedTracks: GpxTrack[],
@@ -41,15 +54,15 @@ export function exportCsvSummary(activities: ActivityRecord[]): string {
     act.fileName,
     act.name || "",
     activityTypeLabel(act.type),
-    act.startTime.toISOString(),
-    act.endTime.toISOString(),
-    (act.distance / 1000).toFixed(2),
-    formatDuration(act.movingTime),
-    formatDuration(act.totalTime),
-    act.elevationGain.toFixed(1),
-    formatPace(act.avgPaceMinPerKm),
-    formatPace(act.bestPaceMinPerKm),
-    act.trainingLoad.toFixed(1),
+    safeDate(act.startTime),
+    safeDate(act.endTime),
+    safeFixed(act.distance / 1000, 2),
+    formatDuration(safeNum(act.movingTime, 0)),
+    formatDuration(safeNum(act.totalTime, 0)),
+    safeFixed(act.elevationGain, 1),
+    formatPace(safeNum(act.avgPaceMinPerKm, 0)),
+    formatPace(safeNum(act.bestPaceMinPerKm, 0)),
+    safeFixed(act.trainingLoad, 1),
     act.weekKey,
   ]);
 
@@ -81,16 +94,16 @@ export function exportMarkdownReport(
   lines.push("## 总览");
   lines.push("");
   lines.push(`- 总活动数: ${summary.totalActivities}`);
-  lines.push(`- 总距离: ${(summary.totalDistance / 1000).toFixed(2)} km`);
-  lines.push(`- 总时长: ${formatDuration(summary.totalDuration)}`);
-  lines.push(`- 总爬升: ${summary.totalElevationGain.toFixed(1)} m`);
+  lines.push(`- 总距离: ${safeFixed(summary.totalDistance / 1000, 2)} km`);
+  lines.push(`- 总时长: ${formatDuration(safeNum(summary.totalDuration, 0))}`);
+  lines.push(`- 总爬升: ${safeFixed(summary.totalElevationGain, 1)} m`);
   lines.push(
-    `- 平均距离/次: ${(summary.avgDistancePerActivity / 1000).toFixed(2)} km`,
+    `- 平均距离/次: ${safeFixed(summary.avgDistancePerActivity / 1000, 2)} km`,
   );
   lines.push(
-    `- 平均时长/次: ${formatDuration(summary.avgDurationPerActivity)}`,
+    `- 平均时长/次: ${formatDuration(safeNum(summary.avgDurationPerActivity, 0))}`,
   );
-  lines.push(`- 整体单调性: ${summary.overallMonotony.toFixed(2)}`);
+  lines.push(`- 整体单调性: ${safeFixed(summary.overallMonotony, 2)}`);
   lines.push(`- 周增幅风险: ${summary.weeklyIncreaseRisk}`);
   lines.push("");
 
@@ -105,7 +118,7 @@ export function exportMarkdownReport(
 
     for (const week of summary.weeklyStats) {
       lines.push(
-        `| ${week.weekStart} ~ ${week.weekEnd} | ${(week.distance / 1000).toFixed(2)} | ${formatDuration(week.duration)} | ${week.elevationGain.toFixed(1)} | ${week.activityCount} | ${week.trainingLoad.toFixed(1)} | ${week.monotony.toFixed(2)} |`,
+        `| ${week.weekStart} ~ ${week.weekEnd} | ${safeFixed(week.distance / 1000, 2)} | ${formatDuration(safeNum(week.duration, 0))} | ${safeFixed(week.elevationGain, 1)} | ${week.activityCount} | ${safeFixed(week.trainingLoad, 1)} | ${safeFixed(week.monotony, 2)} |`,
       );
     }
   } else {
@@ -125,8 +138,12 @@ export function exportMarkdownReport(
     );
 
     activities.forEach((act, idx) => {
+      const dateStr =
+        act.startTime && !isNaN(act.startTime.getTime())
+          ? act.startTime.toLocaleDateString("zh-CN")
+          : "";
       lines.push(
-        `| ${idx + 1} | ${act.name || act.fileName} | ${activityTypeLabel(act.type)} | ${act.startTime.toLocaleDateString("zh-CN")} | ${(act.distance / 1000).toFixed(2)} | ${formatDuration(act.movingTime)} | ${act.elevationGain.toFixed(1)} | ${formatPace(act.avgPaceMinPerKm)} | ${formatPace(act.bestPaceMinPerKm)} | ${act.trainingLoad.toFixed(1)} |`,
+        `| ${idx + 1} | ${act.name || act.fileName} | ${activityTypeLabel(act.type)} | ${dateStr} | ${safeFixed(act.distance / 1000, 2)} | ${formatDuration(safeNum(act.movingTime, 0))} | ${safeFixed(act.elevationGain, 1)} | ${formatPace(safeNum(act.avgPaceMinPerKm, 0))} | ${formatPace(safeNum(act.bestPaceMinPerKm, 0))} | ${safeFixed(act.trainingLoad, 1)} |`,
       );
     });
   } else {
@@ -177,21 +194,25 @@ export function exportSingleActivityReport(
 
   lines.push("## 距离与配速");
   lines.push("");
-  lines.push(`- 总距离: ${(analysis.totalDistance / 1000).toFixed(2)} km`);
-  lines.push(`- 移动距离: ${(analysis.movingDistance / 1000).toFixed(2)} km`);
-  lines.push(`- 总时间: ${formatDuration(analysis.totalTime)}`);
-  lines.push(`- 移动时间: ${formatDuration(analysis.movingTime)}`);
-  lines.push(`- 暂停时间: ${formatDuration(analysis.pauseTime)}`);
-  lines.push(`- 平均配速: ${formatPace(analysis.avgPaceMinPerKm)} /km`);
-  lines.push(`- 最快配速: ${formatPace(analysis.bestPaceMinPerKm)} /km`);
+  lines.push(`- 总距离: ${safeFixed(analysis.totalDistance / 1000, 2)} km`);
+  lines.push(`- 移动距离: ${safeFixed(analysis.movingDistance / 1000, 2)} km`);
+  lines.push(`- 总时间: ${formatDuration(safeNum(analysis.totalTime, 0))}`);
+  lines.push(`- 移动时间: ${formatDuration(safeNum(analysis.movingTime, 0))}`);
+  lines.push(`- 暂停时间: ${formatDuration(safeNum(analysis.pauseTime, 0))}`);
+  lines.push(
+    `- 平均配速: ${formatPace(safeNum(analysis.avgPaceMinPerKm, 0))} /km`,
+  );
+  lines.push(
+    `- 最快配速: ${formatPace(safeNum(analysis.bestPaceMinPerKm, 0))} /km`,
+  );
   lines.push("");
 
   lines.push("## 海拔");
   lines.push("");
-  lines.push(`- 总爬升: ${analysis.totalElevationGain.toFixed(1)} m`);
-  lines.push(`- 总下降: ${analysis.totalElevationLoss.toFixed(1)} m`);
-  lines.push(`- 最高海拔: ${analysis.maxElevation.toFixed(1)} m`);
-  lines.push(`- 最低海拔: ${analysis.minElevation.toFixed(1)} m`);
+  lines.push(`- 总爬升: ${safeFixed(analysis.totalElevationGain, 1)} m`);
+  lines.push(`- 总下降: ${safeFixed(analysis.totalElevationLoss, 1)} m`);
+  lines.push(`- 最高海拔: ${safeFixed(analysis.maxElevation, 1)} m`);
+  lines.push(`- 最低海拔: ${safeFixed(analysis.minElevation, 1)} m`);
   lines.push("");
 
   lines.push("## 最快分段");
@@ -228,7 +249,7 @@ export function exportSingleActivityReport(
 
     for (const seg of analysis.segments) {
       lines.push(
-        `| ${seg.id + 1} | ${(seg.distance / 1000).toFixed(3)} | ${formatDuration(seg.movingTime)} | ${formatDuration(seg.pauseTime)} | ${seg.elevationGain.toFixed(1)} |`,
+        `| ${seg.id + 1} | ${safeFixed(seg.distance / 1000, 3)} | ${formatDuration(safeNum(seg.movingTime, 0))} | ${formatDuration(safeNum(seg.pauseTime, 0))} | ${safeFixed(seg.elevationGain, 1)} |`,
       );
     }
     lines.push("");

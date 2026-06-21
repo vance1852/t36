@@ -70,6 +70,26 @@ function loadGpxFile(filePath: string): GpxData | null {
   }
 }
 
+function loadValidatedGpxFile(filePath: string): {
+  data: GpxData | null;
+  skipReason: string | null;
+} {
+  try {
+    const content = readFileSync(filePath, "utf-8");
+    const validation = validateGpx(content);
+    if (!validation.valid) {
+      return { data: null, skipReason: validation.errors.join("; ") };
+    }
+    const data = parseGpx(content);
+    if (!data || data.tracks.length === 0) {
+      return { data: null, skipReason: "no valid tracks" };
+    }
+    return { data, skipReason: null };
+  } catch (e: any) {
+    return { data: null, skipReason: e.message };
+  }
+}
+
 function ensureDir(filePath: string) {
   const dir = dirname(filePath);
   if (!existsSync(dir)) {
@@ -161,8 +181,9 @@ program
     let skipCount = 0;
 
     for (const file of files) {
-      const data = loadGpxFile(file);
+      const { data, skipReason } = loadValidatedGpxFile(file);
       if (!data) {
+        console.log(`  跳过: ${basename(file)} (${skipReason || "校验失败"})`);
         skipCount++;
         continue;
       }
@@ -310,8 +331,9 @@ program
     let skipCount = 0;
 
     for (const file of files) {
-      const data = loadGpxFile(file);
-      if (!data || data.tracks.length === 0) {
+      const { data, skipReason } = loadValidatedGpxFile(file);
+      if (!data) {
+        console.log(`  跳过: ${basename(file)} (${skipReason || "校验失败"})`);
         skipCount++;
         continue;
       }
@@ -327,7 +349,20 @@ program
 
       const mainTrack = tracks[0];
       const analysis = analyzeTrack(mainTrack);
-      const startTime = mainTrack.segments[0]?.points[0]?.time || new Date();
+      const startTime = mainTrack.segments[0]?.points[0]?.time;
+
+      if (
+        !startTime ||
+        isNaN(startTime.getTime()) ||
+        !isFinite(analysis.totalDistance) ||
+        analysis.totalDistance <= 0 ||
+        !isFinite(analysis.movingTime) ||
+        analysis.movingTime < 0
+      ) {
+        console.log(`  跳过: ${basename(file)} (无效分析结果)`);
+        skipCount++;
+        continue;
+      }
 
       const record = buildActivityRecord(basename(file), analysis, startTime);
       record.name = mainTrack.name;
@@ -394,8 +429,10 @@ program
     const reportsDir = join(options.output, "reports");
 
     for (const file of files) {
-      const data = loadGpxFile(file);
-      if (!data || data.tracks.length === 0) {
+      const fileName = basename(file);
+      const { data, skipReason } = loadValidatedGpxFile(file);
+      if (!data) {
+        console.log(`  跳过: ${fileName} (${skipReason || "校验失败"})`);
         skipCount++;
         continue;
       }
@@ -418,11 +455,6 @@ program
         totalInterpolated += result.stats.interpolatedPoints;
       }
 
-      const cleanedGpx = exportCleanedGpx(data, cleanedTracks);
-      const cleanedPath = join(cleanedDir, basename(file));
-      ensureDir(cleanedPath);
-      writeFileSync(cleanedPath, cleanedGpx, "utf-8");
-
       const mainTrack = cleanedTracks[0];
       const analysis = analyzeTrack(mainTrack);
       const startTime = mainTrack.segments[0]?.points[0]?.time;
@@ -430,24 +462,35 @@ program
       if (
         !startTime ||
         isNaN(startTime.getTime()) ||
-        analysis.totalDistance <= 0
+        !isFinite(analysis.totalDistance) ||
+        analysis.totalDistance <= 0 ||
+        !isFinite(analysis.movingTime) ||
+        analysis.movingTime < 0
       ) {
-        console.log(`  跳过: ${basename(file)} (无效数据)`);
+        console.log(`  跳过: ${fileName} (无效分析结果)`);
         skipCount++;
         continue;
       }
 
+      const cleanedGpx = exportCleanedGpx(data, cleanedTracks);
+      const cleanedPath = join(cleanedDir, fileName);
+      ensureDir(cleanedPath);
+      writeFileSync(cleanedPath, cleanedGpx, "utf-8");
+
+      const originalPointCount = data.tracks.reduce(
+        (sum, t) =>
+          sum + t.segments.reduce((s, seg) => s + seg.points.length, 0),
+        0,
+      );
+      const cleanedPointCount = cleanedTracks.reduce(
+        (sum, t) =>
+          sum + t.segments.reduce((s, seg) => s + seg.points.length, 0),
+        0,
+      );
+
       const cleanStats = {
-        originalPointCount: data.tracks.reduce(
-          (sum, t) =>
-            sum + t.segments.reduce((s, seg) => s + seg.points.length, 0),
-          0,
-        ),
-        cleanedPointCount: cleanedTracks.reduce(
-          (sum, t) =>
-            sum + t.segments.reduce((s, seg) => s + seg.points.length, 0),
-          0,
-        ),
+        originalPointCount,
+        cleanedPointCount,
         driftPointsRemoved: totalDrift,
         duplicateTimestampsMerged: totalDup,
         pauseSegments: 0,
@@ -455,24 +498,17 @@ program
         interpolatedPoints: totalInterpolated,
       };
 
-      const report = exportSingleActivityReport(
-        basename(file),
-        analysis,
-        cleanStats,
-      );
-      const reportPath = join(
-        reportsDir,
-        basename(file).replace(".gpx", ".md"),
-      );
+      const report = exportSingleActivityReport(fileName, analysis, cleanStats);
+      const reportPath = join(reportsDir, fileName.replace(".gpx", ".md"));
       ensureDir(reportPath);
       writeFileSync(reportPath, report, "utf-8");
 
-      const record = buildActivityRecord(basename(file), analysis, startTime);
+      const record = buildActivityRecord(fileName, analysis, startTime);
       record.name = mainTrack.name;
       activities.push(record);
 
       console.log(
-        `✅ ${basename(file)} - ${(analysis.totalDistance / 1000).toFixed(2)} km`,
+        `✅ ${fileName} - ${(analysis.totalDistance / 1000).toFixed(2)} km`,
       );
       successCount++;
     }
@@ -488,8 +524,10 @@ program
 
     console.log(`\n完成: ${successCount} 成功, ${skipCount} 跳过`);
     console.log(`\n输出目录: ${options.output}`);
-    console.log(`  - 清洗后 GPX: ${cleanedDir}/`);
-    console.log(`  - 单活动报告: ${reportsDir}/`);
+    if (successCount > 0) {
+      console.log(`  - 清洗后 GPX: ${cleanedDir}/`);
+      console.log(`  - 单活动报告: ${reportsDir}/`);
+    }
     console.log(`  - CSV 汇总: ${csvPath}`);
     console.log(`  - 总报告: ${mdPath}`);
   });

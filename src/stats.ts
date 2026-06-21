@@ -191,23 +191,52 @@ export function buildActivityRecord(
 ): ActivityRecord {
   const weekKey = getWeekKey(startTime);
 
+  const safeDistance =
+    isFinite(analysis.totalDistance) && analysis.totalDistance > 0
+      ? analysis.totalDistance
+      : 0;
+  const safeMovingTime =
+    isFinite(analysis.movingTime) && analysis.movingTime >= 0
+      ? analysis.movingTime
+      : 0;
+  const safeTotalTime =
+    isFinite(analysis.totalTime) && analysis.totalTime >= 0
+      ? analysis.totalTime
+      : 0;
+  const safeElevationGain =
+    isFinite(analysis.totalElevationGain) && analysis.totalElevationGain >= 0
+      ? analysis.totalElevationGain
+      : 0;
+  const safeAvgPace =
+    isFinite(analysis.avgPaceMinPerKm) && analysis.avgPaceMinPerKm > 0
+      ? analysis.avgPaceMinPerKm
+      : 0;
+  const safeBestPace =
+    isFinite(analysis.bestPaceMinPerKm) && analysis.bestPaceMinPerKm > 0
+      ? analysis.bestPaceMinPerKm
+      : 0;
+  const safeEndTime =
+    analysis.endPoint?.time && !isNaN(analysis.endPoint.time.getTime())
+      ? analysis.endPoint.time
+      : startTime;
+
   return {
     fileName,
     name: analysis.name,
     type: analysis.activityType,
     startTime,
-    endTime: analysis.endPoint?.time || startTime,
-    distance: analysis.totalDistance,
-    movingTime: analysis.movingTime,
-    totalTime: analysis.totalTime,
-    elevationGain: analysis.totalElevationGain,
+    endTime: safeEndTime,
+    distance: safeDistance,
+    movingTime: safeMovingTime,
+    totalTime: safeTotalTime,
+    elevationGain: safeElevationGain,
     trainingLoad: calculateTrainingLoad(
-      analysis.totalDistance,
-      analysis.totalElevationGain,
-      analysis.movingTime,
+      safeDistance,
+      safeElevationGain,
+      safeMovingTime,
     ),
-    avgPaceMinPerKm: analysis.avgPaceMinPerKm,
-    bestPaceMinPerKm: analysis.bestPaceMinPerKm,
+    avgPaceMinPerKm: safeAvgPace,
+    bestPaceMinPerKm: safeBestPace,
     weekKey,
   };
 }
