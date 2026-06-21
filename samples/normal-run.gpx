@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Sample Data" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>正常跑步示例</name>
+    <desc>标准跑步轨迹，用于基准测试</desc>
+    <time>2025-01-13T07:00:00Z</time>
+  </metadata>
+  <trk>
+    <name>晨跑 5km</name>
+    <type>running</type>
+    <trkseg>
+      <trkpt lat="31.2200" lon="121.4500">
+        <ele>5.0</ele>
+        <time>2025-01-13T07:00:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2210" lon="121.4510">
+        <ele>5.5</ele>
+        <time>2025-01-13T07:01:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2220" lon="121.4520">
+        <ele>6.0</ele>
+        <time>2025-01-13T07:02:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2230" lon="121.4530">
+        <ele>6.5</ele>
+        <time>2025-01-13T07:03:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2240" lon="121.4540">
+        <ele>7.0</ele>
+        <time>2025-01-13T07:04:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2250" lon="121.4550">
+        <ele>7.5</ele>
+        <time>2025-01-13T07:05:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2260" lon="121.4560">
+        <ele>8.0</ele>
+        <time>2025-01-13T07:06:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2270" lon="121.4570">
+        <ele>8.5</ele>
+        <time>2025-01-13T07:07:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2280" lon="121.4580">
+        <ele>9.0</ele>
+        <time>2025-01-13T07:08:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2290" lon="121.4590">
+        <ele>9.5</ele>
+        <time>2025-01-13T07:09:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2300" lon="121.4600">
+        <ele>10.0</ele>
+        <time>2025-01-13T07:10:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2310" lon="121.4610">
+        <ele>10.5</ele>
+        <time>2025-01-13T07:11:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2320" lon="121.4620">
+        <ele>11.0</ele>
+        <time>2025-01-13T07:12:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2330" lon="121.4630">
+        <ele>11.5</ele>
+        <time>2025-01-13T07:13:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2340" lon="121.4640">
+        <ele>12.0</ele>
+        <time>2025-01-13T07:14:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2350" lon="121.4650">
+        <ele>12.5</ele>
+        <time>2025-01-13T07:15:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2360" lon="121.4660">
+        <ele>13.0</ele>
+        <time>2025-01-13T07:16:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2370" lon="121.4670">
+        <ele>13.5</ele>
+        <time>2025-01-13T07:17:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2380" lon="121.4680">
+        <ele>14.0</ele>
+        <time>2025-01-13T07:18:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2390" lon="121.4690">
+        <ele>14.5</ele>
+        <time>2025-01-13T07:19:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2400" lon="121.4700">
+        <ele>15.0</ele>
+        <time>2025-01-13T07:20:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2410" lon="121.4710">
+        <ele>15.5</ele>
+        <time>2025-01-13T07:21:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2420" lon="121.4720">
+        <ele>16.0</ele>
+        <time>2025-01-13T07:22:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2430" lon="121.4730">
+        <ele>16.5</ele>
+        <time>2025-01-13T07:23:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2440" lon="121.4740">
+        <ele>17.0</ele>
+        <time>2025-01-13T07:24:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2450" lon="121.4750">
+        <ele>17.5</ele>
+        <time>2025-01-13T07:25:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2460" lon="121.4760">
+        <ele>18.0</ele>
+        <time>2025-01-13T07:26:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2470" lon="121.4770">
+        <ele>18.5</ele>
+        <time>2025-01-13T07:27:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2480" lon="121.4780">
+        <ele>19.0</ele>
+        <time>2025-01-13T07:28:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2490" lon="121.4790">
+        <ele>19.5</ele>
+        <time>2025-01-13T07:29:00Z</time>
+      </trkpt>
+      <trkpt lat="31.2500" lon="121.4800">
+        <ele>20.0</ele>
+        <time>2025-01-13T07:30:00Z</time>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

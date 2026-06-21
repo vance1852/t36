@@ -1,0 +1,28 @@
+{
+  "name": "gpx-cleaner",
+  "version": "1.0.0",
+  "description": "GPX track cleaner and training load analyzer",
+  "type": "module",
+  "bin": {
+    "gpx": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": ["gpx", "running", "cycling", "analysis", "training"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "fast-xml-parser": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
